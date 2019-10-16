@@ -62,6 +62,7 @@
       <button id="button-play-ws" class="button-demo">Play demo</button>
       <button id="button-stop-ws" class="button-demo">Stop demo</button>
       <button id="clear-all" class="button-demo">Clear all</button>
+	  <button  onclick="myFunction()" id="Copy-all" class="button-demo">Copy to ClipBoard</button>
 	   <div id="div_language">
     <select id="select_language" onchange="updateCountry()"></select>
     &nbsp;&nbsp;
@@ -72,6 +73,57 @@
 <div id="info" class="info">
       Press Control-C to copy text.<br>(Command-C on Mac.)
     </div>
+	
+
+<script src="js/quill.core.js"></script>
+<script src="js/quill.js"></script>
+
+
+<!-- Theme included stylesheets -->
+<link href="css/quill.snow.css" rel="stylesheet">
+<link href="css/quill.bubble.css" rel="stylesheet">
+
+<!-- Core build with no theme, formatting, non-essential modules -->
+<link href="css/quill.core.css" rel="stylesheet">
+
+<div id="toolbar">
+  <!-- Add buttons as you would before -->
+  <button class="ql-bold"></button>
+  <button class="ql-italic"></button>
+
+  <!-- But you can also add your own -->
+  <button id="custom-button"></button>
+</div>
+<div id="editor"></div>
+
+<script>
+function myFunction() {
+  /* Get the text field */
+  var copyText = document.getElementById("transcription");
+
+  /* Select the text field */
+  copyText.select(); 
+  copyText.setSelectionRange(0, 99999); /*For mobile devices*/
+
+  /* Copy the text inside the text field */
+  document.execCommand("copy");
+
+  /* Alert the copied text */
+ // alert("Copied the text: " + copyText.value);
+}
+
+
+ var quill = new Quill('#editor', 
+    {theme: 'snow'
+    
+     });
+
+var customButton = document.querySelector('#custom-button');
+customButton.addEventListener('click', function() {
+  console.log('Clicked!');
+});
+</script>
+	
     <script>
 	// If you modify this array, also update default language / dialect below.
 var langs =
