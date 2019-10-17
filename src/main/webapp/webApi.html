@@ -32,10 +32,11 @@
       {
         display: block;
         width: 100%;
-        height: 5em;
+        height: 60px;
         overflow-y: scroll;
         border: 1px solid #333333;
         line-height: 1.3em;
+		font-size: 10px;
       }
 
       .button-demo
@@ -48,32 +49,17 @@
   </head>
   <body>
     <h1>Web Speech API</h1>
-    <h2>Transcription</h2>
-    <textarea id="transcription" readonly="readonly"></textarea>
-
-    <span>Results:</span>
-    <label><input type="radio" name="recognition-type" value="final" checked="checked" /> Final only</label>
-    <label><input type="radio" name="recognition-type" value="interim" /> Interim</label>
-
-    <h3>Log</h3>
-    <div id="log"></div>
-
+   
     <div class="buttons-wrapper">
-      <button id="button-play-ws" class="button-demo">Play demo</button>
       <button id="button-stop-ws" class="button-demo">Stop demo</button>
       <button id="clear-all" class="button-demo">Clear all</button>
-	  <button  onclick="myFunction()" id="Copy-all" class="button-demo">Copy to ClipBoard</button>
-	   <div id="div_language">
-    <select id="select_language" onchange="updateCountry()"></select>
-    &nbsp;&nbsp;
-    <select id="select_dialect"></select>
-  </div>
+	 
+	   
     </div>
     <span id="ws-unsupported" class="hidden">API not supported</span>
 <div id="info" class="info">
       Press Control-C to copy text.<br>(Command-C on Mac.)
     </div>
-	
 
 <script src="js/quill.core.js"></script>
 <script src="js/quill.js"></script>
@@ -86,46 +72,119 @@
 <!-- Core build with no theme, formatting, non-essential modules -->
 <link href="css/quill.core.css" rel="stylesheet">
 
-<div id="toolbar">
+<div id="toolbar" class="ql-toolbar ql-snow" >
   <!-- Add buttons as you would before -->
-  <button class="ql-bold"></button>
-  <button class="ql-italic"></button>
-
-  <!-- But you can also add your own -->
-  <button id="custom-button"></button>
+   <span class="ql-formats"><button id="butrez" class="button-demo"><img id="start_img" src="img/mic.gif" alt="Start"></button>
+  </span>
+   <span  style="font-size: 10px;" class="ql-formats"> <select id="select_language" onchange="updateCountry()"></select></span>
+   
+    <span style="font-size: 10px;" class="ql-formats"><select id="select_dialect"></select></span>
+	<span style="font-size: 10px;" class="ql-formats">Results:</span>
+    <span style="font-size: 10px;" class="ql-formats"><input type="radio" name="recognition-type" value="final" checked="checked" > Final only</input></span>
+    <span style="font-size: 10px;" class="ql-formats"><input type="radio" name="recognition-type" value="interim" > Interim</input><span>
+   
 </div>
-<div id="editor"></div>
-
+<div id="editor" style="height:300px;"></div>
+<div id="toolbar" class="ql-toolbar ql-snow" >
+  <!-- Add buttons as you would before -->
+  
+   <div id="log"></div>
+  
+   
+</div>
 <script>
-function myFunction() {
-  /* Get the text field */
-  var copyText = document.getElementById("transcription");
-
-  /* Select the text field */
-  copyText.select(); 
-  copyText.setSelectionRange(0, 99999); /*For mobile devices*/
-
-  /* Copy the text inside the text field */
-  document.execCommand("copy");
-
-  /* Alert the copied text */
- // alert("Copied the text: " + copyText.value);
-}
-
-
- var quill = new Quill('#editor', 
+var quill = new Quill('#editor', 
     {theme: 'snow'
     
      });
 
-var customButton = document.querySelector('#custom-button');
-customButton.addEventListener('click', function() {
-  console.log('Clicked!');
-});
 </script>
 	
     <script>
 	// If you modify this array, also update default language / dialect below.
+	  // Test browser support
+	  var recognizing = false;
+      window.SpeechRecognition = window.SpeechRecognition       ||
+                                 window.webkitSpeechRecognition ||
+                                 null;
+
+      if (window.SpeechRecognition === null) {
+	  start_img.src = 'img/mic-slash.gif';
+        document.getElementById('ws-unsupported').classList.remove('hidden');
+        document.getElementById('button-play-ws').setAttribute('disabled', 'disabled');
+        document.getElementById('button-stop-ws').setAttribute('disabled', 'disabled');
+      } else {
+        var recognizer = new window.SpeechRecognition();
+        var log = document.getElementById('log');
+        var resultOftrans='';
+		var confidence='';
+        // Recogniser doesn't stop listening even if the user pauses
+        recognizer.continuous = true;
+		// Setting Language to recognizer 
+        recognizer.lang = select_dialect.value;
+		// Start recognising
+        recognizer.onresult = function(event) {
+          recognizing = false;
+		  start_img.src = 'img/mic.gif';
+		  resultOftrans='';
+		  confidence='';
+          for (var i = event.resultIndex; i < event.results.length; i++) {
+            if (event.results[i].isFinal) {
+              confidence = event.results[i][0].confidence;
+			  resultOftrans+=event.results[i][0].transcript;
+            } else {
+             resultOftrans+=event.results[i][0].transcript;
+            }
+          }
+		   var caretPosition = quill.getSelection(true);
+           quill.insertText(caretPosition, resultOftrans);
+		   log.innerHTML = 'Recognition Confidence: ' + confidence + '<br />' + log.innerHTML;
+        };
+
+        // Listen for errors
+        recognizer.onerror = function(event) {
+          log.innerHTML = 'Recognition error: ' + event.message + '<br />' + log.innerHTML;
+		   start_img.src = 'img/mic-slash.gif';
+        };
+
+        document.getElementById('butrez').addEventListener('click', function() {
+          // Set if we need interim results
+          recognizer.interimResults = document.querySelector('input[name="recognition-type"][value="interim"]').checked;
+
+          try {
+		  if(!recognizing)
+            {recognizer.start();
+			recognizing = true;
+			 start_img.src = 'img/mic-animate.gif';
+            log.innerHTML = 'Recognition started' + '<br />' + log.innerHTML;
+			}else
+			{
+			recognizer.stop();
+		  start_img.src = 'img/mic.gif';
+		  recognizing = false;
+		   log.innerHTML = 'Recognition stopped' + '<br />' + log.innerHTML;
+			}
+          } catch(ex) {
+            log.innerHTML = 'Recognition error: ' + ex.message + '<br />' + log.innerHTML;
+          }
+        });
+
+        document.getElementById('button-stop-ws').addEventListener('click', function() {
+          recognizer.stop();
+		  start_img.src = 'img/mic.gif';
+		  recognizing = false;
+          log.innerHTML = 'Recognition stopped' + '<br />' + log.innerHTML;
+        });
+
+        document.getElementById('clear-all').addEventListener('click', function() {
+         
+          log.textContent = '';
+        });
+		
+      }
+	
+	
+	
 var langs =
 [['Afrikaans',       ['af-ZA']],
  ['አማርኛ',           ['am-ET']],
@@ -235,7 +294,7 @@ var langs =
 select_language.selectedIndex = 6;
 updateCountry();
 select_dialect.selectedIndex = 6;
-showInfo('info_start');
+
 
 function updateCountry() {
   for (var i = select_dialect.options.length - 1; i >= 0; i--) {
@@ -246,79 +305,27 @@ function updateCountry() {
     select_dialect.options.add(new Option(list[i][1], list[i][0]));
   }
   select_dialect.style.visibility = list[1].length == 1 ? 'hidden' : 'visible';
-}
-function showInfo(s) {
-  if (s) {
-    for (var child = info.firstChild; child; child = child.nextSibling) {
-      if (child.style) {
-        child.style.display = child.id == s ? 'inline' : 'none';
-      }
-    }
-    info.style.visibility = 'visible';
-  } else {
-    info.style.visibility = 'hidden';
+  console.log('update country');
+  console.log(list);
+  if(list[1].length>=1)
+  {
+  if(window.SpeechRecognition === null){}else
+  {
+  console.log(' Update Country:'+document.getElementById("select_dialect").options[document.getElementById('select_dialect').selectedIndex].value);
+  recognizer.lang = document.getElementById("select_dialect").options[document.getElementById('select_dialect').selectedIndex].value;
+  
+  }
   }
 }
 
  
-      // Test browser support
-      window.SpeechRecognition = window.SpeechRecognition       ||
-                                 window.webkitSpeechRecognition ||
-                                 null;
-
-      if (window.SpeechRecognition === null) {
-        document.getElementById('ws-unsupported').classList.remove('hidden');
-        document.getElementById('button-play-ws').setAttribute('disabled', 'disabled');
-        document.getElementById('button-stop-ws').setAttribute('disabled', 'disabled');
-      } else {
-        var recognizer = new window.SpeechRecognition();
-        var transcription = document.getElementById('transcription');
-        var log = document.getElementById('log');
-
-        // Recogniser doesn't stop listening even if the user pauses
-        recognizer.continuous = true;
-		// Setting Language to recognizer 
-        recognizer.lang = select_dialect.value;
-        // Start recognising
-        recognizer.onresult = function(event) {
-          transcription.textContent = '';
-
-          for (var i = event.resultIndex; i < event.results.length; i++) {
-            if (event.results[i].isFinal) {
-              transcription.textContent = event.results[i][0].transcript + ' (Confidence: ' + event.results[i][0].confidence + ')';
-            } else {
-              transcription.textContent += event.results[i][0].transcript;
-            }
-          }
-        };
-
-        // Listen for errors
-        recognizer.onerror = function(event) {
-          log.innerHTML = 'Recognition error: ' + event.message + '<br />' + log.innerHTML;
-        };
-
-        document.getElementById('button-play-ws').addEventListener('click', function() {
-          // Set if we need interim results
-          recognizer.interimResults = document.querySelector('input[name="recognition-type"][value="interim"]').checked;
-
-          try {
-            recognizer.start();
-            log.innerHTML = 'Recognition started' + '<br />' + log.innerHTML;
-          } catch(ex) {
-            log.innerHTML = 'Recognition error: ' + ex.message + '<br />' + log.innerHTML;
-          }
+    
+	    document.getElementById('select_dialect').addEventListener('change', function() {
+           console.log(document.getElementById("select_dialect").options[document.getElementById('select_dialect').selectedIndex].value );
+		   recognizer.lang = document.getElementById("select_dialect").options[document.getElementById('select_dialect').selectedIndex].value;
+		   console.log( recognizer.lang+':  recognizer.lang');
         });
-
-        document.getElementById('button-stop-ws').addEventListener('click', function() {
-          recognizer.stop();
-          log.innerHTML = 'Recognition stopped' + '<br />' + log.innerHTML;
-        });
-
-        document.getElementById('clear-all').addEventListener('click', function() {
-          transcription.textContent = '';
-          log.textContent = '';
-        });
-      }
+	 
     </script>
   </body>
 </html>
