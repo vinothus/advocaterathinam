@@ -120,8 +120,9 @@
 	<span style="font-size: 10px; width:22px;" class="ql-formats" >Results:</span>
     <span style="font-size: 10px;" class="ql-formats"><input type="radio" name="recognition-type" value="final" checked="checked" > Final only</input></span>
     <span style="font-size: 10px;" class="ql-formats"><input type="radio" name="recognition-type" value="interim" > Interim</input></span>
-    <span style="font-size: 10px;" class="ql-formats"><button id="clear-all" style="width:60px" class="button-demo">Clear all</button></span>
-	<span style="font-size: 10px;" class="ql-formats"><button id="button-stop-ws" style="width:60px" class="button-demo">Stop</button></span>
+    <span style="font-size: 10px;" id="clear-all" class="ql-formats glyphicon glyphicon-trash"></span>
+	<span style="font-size: 10px;" id="button-stop-ws" class="ql-formats glyphicon glyphicon-stop">
+	<span class="glyphicon glyphicon-download-alt" onclick="exportHTML()"></span>
 </div>
 <div id="editor" style="height:300px;"></div>
 <div id="toolbar" class="ql-toolbar ql-snow" >
@@ -367,7 +368,27 @@ function updateCountry() {
 		   console.log( recognizer.lang+':  recognizer.lang');
         });
 	 
+	 
     </script>
+	
+	<script>
+    function exportHTML(){
+       var header = "<html xmlns:o='urn:schemas-microsoft-com:office:office' "+
+            "xmlns:w='urn:schemas-microsoft-com:office:word' "+
+            "xmlns='http://www.w3.org/TR/REC-html40'>"+
+            "<head><meta charset='utf-8'><title>Export HTML to Word Document with JavaScript</title></head><body>";
+       var footer = "</body></html>";
+       var sourceHTML = header+quill.root.innerHTML;+footer;
+       
+       var source = 'data:application/vnd.ms-word;charset=utf-8,' + encodeURIComponent(sourceHTML);
+       var fileDownload = document.createElement("a");
+       document.body.appendChild(fileDownload);
+       fileDownload.href = source;
+       fileDownload.download = 'document.doc';
+       fileDownload.click();
+       document.body.removeChild(fileDownload);
+    }
+</script>
 	<script src="resources/jquery-1.9.1.min.js" type="text/javascript"></script>
     <script src="resources/bootstrap.js"></script>
     <script src="resources/bootswatch.js"></script>
