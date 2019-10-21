@@ -126,6 +126,7 @@
     <span style="font-size: 10px;" id="clear-all" class="ql-formats glyphicon glyphicon-trash"></span>
 	<span style="font-size: 10px;" id="button-stop-ws" class="ql-formats glyphicon glyphicon-stop">
 	<span class="glyphicon glyphicon-download-alt" onclick="exportHTML()"></span>
+	<span class="glyphicon glyphicon-print" onclick="printArea('editor')"></span>
 </div>
 <div id="standalone-container">
   <div id="toolbar-container">
@@ -444,6 +445,19 @@ function updateCountry() {
        fileDownload.click();
        document.body.removeChild(fileDownload);
     }
+</script>
+	 <script type="text/javascript">
+    function printArea(areaName)
+    {
+        var printContents = document.getElementById(areaName).innerHTML;
+        var originalContents = document.body.innerHTML;
+
+        document.body.innerHTML = printContents;
+
+        window.print();
+
+        document.body.innerHTML = originalContents;
+    }   
 </script>
 	<script src="resources/jquery-1.9.1.min.js" type="text/javascript"></script>
     <script src="resources/bootstrap.js"></script>
