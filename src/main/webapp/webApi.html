@@ -449,15 +449,15 @@ function updateCountry() {
 	 <script type="text/javascript">
     function printArea(areaName)
     {
-        var printContents = document.getElementById(areaName).innerHTML;
-        var originalContents = document.body.innerHTML;
-
-        document.body.innerHTML = printContents;
-
-        window.print();
-
-        document.body.innerHTML = originalContents;
-    }   
+       var printContents = document.getElementById(areaName).innerHTML;
+       var printwindow = window.open('', 'Print', 'height=600,width=800');
+	   printwindow.document.write(printContents);
+       printwindow.document.close();
+       printwindow.focus()
+       printwindow.print();
+       printwindow.close();
+    return true;
+    } 
 </script>
 	<script src="resources/jquery-1.9.1.min.js" type="text/javascript"></script>
     <script src="resources/bootstrap.js"></script>
