@@ -245,7 +245,11 @@ var quill = new Quill('#editor', {
           log.innerHTML = 'Recognition error: ' + event.message + '<br />' + log.innerHTML;
 		   start_img.src = 'img/mic-slash.gif';
         };
-
+      recognizer.onend = function() {
+             console.log('Speech recognition service disconnected');
+			 recognizing = false;
+		 start_img.src = 'img/mic.gif';
+         }
         document.getElementById('butrez').addEventListener('click', function() {
           // Set if we need interim results
           recognizer.interimResults = document.querySelector('input[name="recognition-type"][value="interim"]').checked;
