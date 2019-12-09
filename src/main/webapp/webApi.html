@@ -223,8 +223,8 @@ var quill = new Quill('#editor', {
         recognizer.lang = select_dialect.value;
 		// Start recognising
         recognizer.onresult = function(event) {
-          recognizing = false;
-		  start_img.src = 'img/mic.gif';
+          //recognizing = false;
+		  //start_img.src = 'img/mic.gif';
 		  resultOftrans='';
 		  confidence='';
           for (var i = event.resultIndex; i < event.results.length; i++) {
